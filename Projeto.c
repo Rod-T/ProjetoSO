@@ -157,7 +157,7 @@ int main(){
 	printf("\n%d %d %d",contaLine(0),contaLine(1),contaLine(2));
 
 	printf("\nSolucao\n");
-	solRand();
+	initializeSol();
 	printSol();
     printf("\nResultado conta");
 	printf("\n%d %d %d",contaSol(0),contaSol(1),contaSol(2));
