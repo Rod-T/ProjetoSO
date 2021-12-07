@@ -129,7 +129,7 @@ void initializeSol(){
 
 	for (int i = 0; i < n; i++)
 	{
-		while(contaSol(i)>qtdPecas[i]){
+		while(contaSol(i)<qtdPecas[i]){
 			solRandL(i);
 		} 
 	}
