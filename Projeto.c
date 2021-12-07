@@ -17,7 +17,7 @@ int maxComprimento; // numero maximo do comprimento das pecas
 int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
 
-void load(){
+void loadTeste(){
 	n = 3;
 	m = 3;
 	maxComprimento = 9;
@@ -83,7 +83,7 @@ void getSol(){
 	}
 }
 
-int checkSol(int col){
+int contaSol(int col){
 
 	//refazer
 	int sum = 0;
@@ -97,13 +97,27 @@ int checkSol(int col){
 	return sum;
 }
 
+void checkSol(){
+
+	for (int i = 0; i < n; i++)
+	{
+		do
+		{
+			getSol();
+		} while (contaSol(i)>qtdPecas[i]);
+		
+	}
+	
+
+}
+
 int main(){
 	// para determinar o tempo q demorou
 	struct timeval tvi, tvf, tvres;
 	gettimeofday(&tvi,NULL);
 	for(int i=0; i<10000000; i++);	
 	
-	load();
+	loadTeste();
 
 	initializeMatrix();
 	
@@ -112,16 +126,14 @@ int main(){
 
 
 	printf("\nSolucao\n");
-	
-	//for(int i=0;i<n;i++){
-	//	printf("%d ",sol[i]);
-	//}
-	
-	printf("\n\nConta Solucao\n");
-	//printf("%d %d %d\n\n",checkSol(0),checkSol(1),checkSol(2));
+	checkSol();
+
+	for(int i=0;i<n;i++){
+		printf("%d ",sol[i]);
+	}
 
 	gettimeofday(&tvf,NULL);
 	timersub(&tvf,&tvi,&tvres);
-	printf("Time = %4ld.%03ld\n", (long)tvres.tv_sec,(long)tvres.tv_usec/1000);
+	printf("\nTime = %4ld.%03ld\n", (long)tvres.tv_sec,(long)tvres.tv_usec/1000);
 	return 0;
 }
