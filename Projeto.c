@@ -17,6 +17,7 @@ int maxComprimento; // numero maximo do comprimento das pecas
 int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
 
+//usado para fazer testes
 void loadTeste(){
 	n = 3;
 	m = 3;
@@ -28,6 +29,10 @@ void loadTeste(){
 	qtdPecas[0] = 20;
 	qtdPecas[1] = 10;
 	qtdPecas[2] = 20;
+
+	sol[0] = 30;
+	sol[1] = 30;
+	sol[2] = 30;
 
 }
 
@@ -41,6 +46,7 @@ void printMatrix(){
 	}
 }
 
+//usado para fazer a conta da linha
 int contaLine(int line){
 	int sum = 0;
 	
@@ -51,9 +57,9 @@ int contaLine(int line){
 	return sum;
 }
 
+//usado para inicializar a matrix 
 void matrixRand(){
 	srand(time(NULL));
-
 	//atribuir valores random a matriz
 	for(int i = 0 ; i < n ; i++ ){
 		for(int l = 0 ; l < m ; l++ ){
@@ -66,49 +72,72 @@ void matrixRand(){
 	}
 }
 
-//fazer o check da matriz se e menor q o maxComprimento
-void initializeMatrix(){
-	for (int i = 0; i < n; i++){
-		do{
-			matrixRand();
-		} while ((contaLine(i) > maxComprimento));
+//usado para alterar apenas valor numa linha
+void matrixRandL(int line){
+	srand(time(NULL));
+
+	//atribuir valores random a matriz
+	for(int i = 0 ; i < n ; i++ ){
+		if(i == line){
+			//do nothing
+		}else{
+			matrix[i][line] = 0 + rand()%(maxComprimento/compPecas[i]);
+		}		
 	}
 }
 
-//para fazer a solucao to do
-void getSol(){
+//fazer o check da matriz se e menor q o maxComprimento
+void initializeMatrix(){
+	matrixRand();
+	for (int i = 0; i < n; i++){
+		while(contaLine(i) > maxComprimento){
+			matrixRandL(i);
+		}
+	}
+}
+
+//para inicializar solucao
+void solRand(){
 	srand(time(NULL));
+
 	for(int i=0 ; i < n ; i++){
 		sol[i] = 1 + rand()%(maxComprimento+1);
 	}
 }
 
-int contaSol(int col){
+void solRandL(int l){
+	srand(time(NULL));
 
-	//refazer
+	sol[l] = 1 + rand()%(maxComprimento+1);
+}
+
+//usado para fazer a conta da solucao
+int contaSol(int col){
 	int sum = 0;
 
-	for(int i ; i < n ; i++){
+	for(int i = 0 ; i < n ; i++){
 		sum += (matrix[col][i]*sol[i]);
 	}
-
-	// sum = (matrix[n][0]*sol[0]) + (matrix[n][1]*sol[1]) + (matrix[n][2]*sol[2]);
 
 	return sum;
 }
 
-void checkSol(){
+//usado para inicializar a solucao
+void initializeSol(){
+	solRand();
 
 	for (int i = 0; i < n; i++)
 	{
-		do
-		{
-			getSol();
-		} while (contaSol(i)>qtdPecas[i]);
-		
+		while(contaSol(i)>qtdPecas[i]){
+			solRandL(i);
+		} 
 	}
-	
+}
 
+void printSol(){
+	for(int i=0;i<n;i++){
+		printf("%d ",sol[i]);
+	}
 }
 
 int main(){
@@ -123,14 +152,14 @@ int main(){
 	
 	printf("Matriz\n");
 	printMatrix(matrix);
-
+	printf("Resultado conta");
+	printf("\n%d %d %d",contaLine(0),contaLine(1),contaLine(2));
 
 	printf("\nSolucao\n");
-	checkSol();
-
-	for(int i=0;i<n;i++){
-		printf("%d ",sol[i]);
-	}
+	solRand();
+	printSol();
+    printf("\nResultado conta");
+	printf("\n%d %d %d",contaSol(0),contaSol(1),contaSol(2));
 
 	gettimeofday(&tvf,NULL);
 	timersub(&tvf,&tvi,&tvres);
