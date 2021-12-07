@@ -16,6 +16,7 @@ int m; // numero de linhas da matriz
 int maxComprimento; // numero maximo do comprimento das pecas
 int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
+int totalLoss;
 
 //usado para fazer testes
 void loadTeste(){
