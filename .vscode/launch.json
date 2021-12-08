@@ -9,9 +9,9 @@
         ""
       ],
       "stopAtEntry": false,
-      "cwd": "/home/rod/ProjetoSO",
+      "cwd": "/home/rod/Documents/ProjetoSO",
       "environment": [],
-      "program": "/home/rod/ProjetoSO/ProjDebug",
+      "program": "/home/rod/Documents/ProjetoSO/build/Debug/outDebug",
       "internalConsoleOptions": "openOnSessionStart",
       "MIMode": "gdb",
       "miDebuggerPath": "/bin/gdb",

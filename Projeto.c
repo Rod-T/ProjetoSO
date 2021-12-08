@@ -141,6 +141,28 @@ void printSol(){
 	}
 }
 
+void calcLosses(){
+	int sum = 0;
+	for (int i = 0; i < m; i++){
+		sum = 0;
+		for (int j = 0; j < n; j++){
+			sum += sol[j] * matrix[i][j];
+		}
+		sum -= qtdPecas[i];
+		sum *= compPecas[i];
+		totalLoss += sum;
+	}
+
+	for (int j=0; j < n; j++) {
+        sum = 0;
+        for (int i=0; i < m; i++) {
+            sum += matrix[i][j] * compPecas[i];
+        }
+        totalLoss += sol[j]* (maxComprimento - sum);
+    }
+
+}
+
 int main(){
 	// para determinar o tempo q demorou
 	struct timeval tvi, tvf, tvres;
@@ -161,6 +183,10 @@ int main(){
 	printSol();
     printf("\nResultado conta");
 	printf("\n%d %d %d",contaSol(0),contaSol(1),contaSol(2));
+
+	calcLosses();
+	printf("\nTotal Loss");
+	printf("\n%d",totalLoss);
 
 	gettimeofday(&tvf,NULL);
 	timersub(&tvf,&tvi,&tvres);
