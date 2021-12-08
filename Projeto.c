@@ -18,11 +18,17 @@ int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
 int totalLoss;
 
+void load(){
+	//todo
+}
+
 //usado para fazer testes
 void loadTeste(){
 	n = 3;
 	m = 3;
+
 	maxComprimento = 9;
+
 	compPecas[0] = 2;
 	compPecas[1] = 3;
 	compPecas[2] = 4;
@@ -30,10 +36,6 @@ void loadTeste(){
 	qtdPecas[0] = 20;
 	qtdPecas[1] = 10;
 	qtdPecas[2] = 20;
-
-	sol[0] = 30;
-	sol[1] = 30;
-	sol[2] = 30;
 
 }
 
@@ -52,7 +54,7 @@ int contaLine(int line){
 	int sum = 0;
 	
 	for(int i = 0; i < m ; i++){
-		sum += (compPecas[line] * matrix[i][line]);
+		sum += (compPecas[i] * matrix[i][line]);
 	}
 
 	return sum;
@@ -117,7 +119,7 @@ int contaSol(int col){
 	int sum = 0;
 
 	for(int i = 0 ; i < n ; i++){
-		sum += (matrix[col][i]*sol[i]);
+		sum += (matrix[col][i] * sol[i]);
 	}
 
 	return sum;
@@ -131,7 +133,7 @@ void initializeSol(){
 	{
 		while(contaSol(i)<qtdPecas[i]){
 			solRandL(i);
-		} 
+		}
 	}
 }
 
@@ -169,6 +171,7 @@ int main(){
 	gettimeofday(&tvi,NULL);
 	for(int i=0; i<10000000; i++);	
 	
+	//load();
 	loadTeste();
 
 	initializeMatrix();
