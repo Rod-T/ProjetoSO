@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <time.h>
+#include <string.h>
 #define MAX 50
 
 
@@ -18,9 +19,12 @@ int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
 int totalLoss;
 
-void load(){
-	//todo
-}
+char filename[64];
+int processNumber = 0;
+int executionTime = 0;
+char line[1000];
+int lineCount = 0;
+FILE *file;
 
 //usado para fazer testes
 void loadTeste(){
@@ -66,7 +70,7 @@ void matrixRand(){
 	//atribuir valores random a matriz
 	for(int i = 0 ; i < n ; i++ ){
 		for(int l = 0 ; l < m ; l++ ){
-			if((i == l)){
+			if(i == l){
 				matrix[i][l] = 1 + rand()%(maxComprimento/compPecas[i]); // 1 + rand()%(MaximoComprimento/Comprimentos[i])
 			}else{
 				matrix[i][l] = 0 + rand()%(maxComprimento/compPecas[i]);
@@ -103,7 +107,7 @@ void initializeMatrix(){
 void solRand(){
 	srand(time(NULL));
 
-	for(int i=0 ; i < n ; i++){
+	for(int i=0; i < n ; i++){
 		sol[i] = 1 + rand()%(maxComprimento+1);
 	}
 }
@@ -128,7 +132,6 @@ int contaSol(int col){
 //usado para inicializar a solucao
 void initializeSol(){
 	solRand();
-
 	for (int i = 0; i < n; i++)
 	{
 		while(contaSol(i)<qtdPecas[i]){
@@ -165,14 +168,65 @@ void calcLosses(){
 
 }
 
-int main(){
+int main(int argc, char **argv){
+	if(argc == 4){
+		for(int i=0; i<argc; i++){
+			strcpy(filename, argv[1]);
+			processNumber = atoi(argv[2]);
+			executionTime = atoi(argv[3]);
+		}
+	} else {
+		printf("Usage: pcu file.txt number_of_processes execution_time\n");
+		printf("Example: pcu prob03.txt 10 60\n");
+		exit(1);
+	}
+
+
+	if ((file = fopen(filename, "r")) == NULL) {
+		printf("Error! File cannot be opened\n");
+		exit(1);
+	}
+
+	while (fgets(line, sizeof(line), file)) {
+		int x, y, z;
+		switch(lineCount){
+			case 0:
+				n = atoi(line);
+				break;
+			case 1:
+				m = atoi(line);
+				break;
+			case 2:
+				maxComprimento = atoi(line);
+				break;
+			case 3:
+				sscanf(line, "%d %d %d", &x, &y, &z);
+				compPecas[0] = x;
+				compPecas[1] = y;
+				compPecas[2] = z;
+				break;
+			case 4:
+				sscanf(line, "%d %d %d", &x, &y, &z);
+				qtdPecas[0] = x;
+				qtdPecas[1] = y;
+				qtdPecas[2] = z;
+				break;
+			default:
+				printf("Error! Too many lines in this file");
+		}
+		lineCount++;
+	}
+
+	fclose(file);
+
+
 	// para determinar o tempo q demorou
 	struct timeval tvi, tvf, tvres;
 	gettimeofday(&tvi,NULL);
 	for(int i=0; i<10000000; i++);	
 	
 	//load();
-	loadTeste();
+	//loadTeste();
 
 	initializeMatrix();
 	
