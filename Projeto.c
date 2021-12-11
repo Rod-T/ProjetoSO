@@ -12,35 +12,82 @@
 int matrix[MAX][MAX];
 int sol[MAX];
 
-int n; // numero de colunas da matriz
-int m; // numero de linhas da matriz
+int n = 0; // numero de colunas da matriz
+int m = 0; // numero de linhas da matriz
 int maxComprimento; // numero maximo do comprimento das pecas
 int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
-int totalLoss;
+int totalLoss = 0;
 
-char filename[64];
 int processNumber = 0;
 int executionTime = 0;
-char line[1000];
+char filename[64] = "";
+char line[256];
 int lineCount = 0;
 FILE *file;
 
-//usado para fazer testes
-void loadTeste(){
-	n = 3;
-	m = 3;
+//Função auxiliar para remover os espaços e guardar os dados nos respetivos arrays
+void splitLine(int arr[], char line[]){
+	int i = 0;
+	char delim[2] = " ";
+	char *token;
 
-	maxComprimento = 9;
+	token = strtok(line, delim);
+	while(token != NULL){
+		if(i < n){
+			arr[i] = atoi(token);
+		}
 
-	compPecas[0] = 2;
-	compPecas[1] = 3;
-	compPecas[2] = 4;
+		i++;
+		token = strtok(NULL, delim);
+	}
+}
 
-	qtdPecas[0] = 20;
-	qtdPecas[1] = 10;
-	qtdPecas[2] = 20;
+//Função para tratar os argumentos e ler o ficheiro de PCU_Tests
+void readFile(int argc, char **argv){
+	if(argc == 4){
+		for(int i=0; i<argc; i++){
+			strcpy(filename, argv[1]);
+			processNumber = atoi(argv[2]);
+			executionTime = atoi(argv[3]);
+		}
+	} else {
+		printf("Usage: pcu file.txt number_of_processes execution_time\n");
+		printf("Example: pcu prob03.txt 10 60\n");
+		exit(1);
+	}
 
+
+	if ((file = fopen(filename, "r")) == NULL) {
+		printf("Error! File cannot be opened\n");
+		exit(1);
+	}
+
+	while (fgets(line, sizeof(line), file)) {
+		switch(lineCount){
+			case 0:
+				n = atoi(line);
+				break;
+			case 1:
+				m = atoi(line);
+				break;
+			case 2:
+				maxComprimento = atoi(line);
+				break;
+			case 3:{
+				splitLine(compPecas, line);
+				break;
+			}
+			case 4:
+				splitLine(qtdPecas, line);
+				break;
+			default:
+				printf("Error! Too many lines in this file");
+		}
+		lineCount++;
+	}
+
+	fclose(file);
 }
 
 //fazer print da matriz
@@ -169,56 +216,7 @@ void calcLosses(){
 }
 
 int main(int argc, char **argv){
-	if(argc == 4){
-		for(int i=0; i<argc; i++){
-			strcpy(filename, argv[1]);
-			processNumber = atoi(argv[2]);
-			executionTime = atoi(argv[3]);
-		}
-	} else {
-		printf("Usage: pcu file.txt number_of_processes execution_time\n");
-		printf("Example: pcu prob03.txt 10 60\n");
-		exit(1);
-	}
-
-
-	if ((file = fopen(filename, "r")) == NULL) {
-		printf("Error! File cannot be opened\n");
-		exit(1);
-	}
-
-	while (fgets(line, sizeof(line), file)) {
-		int x, y, z;
-		switch(lineCount){
-			case 0:
-				n = atoi(line);
-				break;
-			case 1:
-				m = atoi(line);
-				break;
-			case 2:
-				maxComprimento = atoi(line);
-				break;
-			case 3:
-				sscanf(line, "%d %d %d", &x, &y, &z);
-				compPecas[0] = x;
-				compPecas[1] = y;
-				compPecas[2] = z;
-				break;
-			case 4:
-				sscanf(line, "%d %d %d", &x, &y, &z);
-				qtdPecas[0] = x;
-				qtdPecas[1] = y;
-				qtdPecas[2] = z;
-				break;
-			default:
-				printf("Error! Too many lines in this file");
-		}
-		lineCount++;
-	}
-
-	fclose(file);
-
+	readFile(argc, argv);
 
 	// para determinar o tempo q demorou
 	struct timeval tvi, tvf, tvres;
