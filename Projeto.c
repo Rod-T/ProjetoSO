@@ -7,6 +7,7 @@
 #include <time.h>
 #include <string.h>
 #define MAX 50
+#define MAX_TRY 1000
 
 
 int matrix[MAX][MAX];
@@ -17,7 +18,10 @@ int m = 0; // numero de linhas da matriz
 int maxComprimento; // numero maximo do comprimento das pecas
 int compPecas[MAX]; // comp em metros das pecas a cortar
 int qtdPecas[MAX]; //
+int maxes[MAX];
 int totalLoss = 0;
+int avaliation = 0;
+int triesSol = 0;
 
 int processNumber = 0;
 int executionTime = 0;
@@ -132,9 +136,7 @@ void matrixRandL(int line){
 
 	//atribuir valores random a matriz
 	for(int i = 0 ; i < n ; i++ ){
-		if(i == line){
-			//do nothing
-		}else{
+		if(i != line){
 			matrix[i][line] = 0 + rand()%(maxComprimento/compPecas[i]);
 		}		
 	}
@@ -150,39 +152,67 @@ void initializeMatrix(){
 	}
 }
 
-//para inicializar solucao
-void solRand(){
-	srand(time(NULL));
-
-	for(int i=0; i < n ; i++){
-		sol[i] = 1 + rand()%(maxComprimento+1);
-	}
-}
-
-void solRandL(int l){
-	srand(time(NULL));
-
-	sol[l] = 1 + rand()%(maxComprimento+1);
+int max(int a, int b){
+	if (a > b)
+		return a;
+	else
+		return b;
+	
 }
 
 //usado para fazer a conta da solucao
-int contaSol(int col){
-	int sum = 0;
+int contaSol(){
+	int sum;
 
 	for(int i = 0 ; i < n ; i++){
-		sum += (matrix[col][i] * sol[i]);
+		sum = 0;
+		for (int j = 0; j < m; j++)
+		{
+			sum += (matrix[i][j] * sol[i]);
+		}	
+		if(sum < qtdPecas[i])
+			return 1;
 	}
-
-	return sum;
+	return 0;
 }
 
-//usado para inicializar a solucao
-void initializeSol(){
-	solRand();
-	for (int i = 0; i < n; i++)
+void solRand(){
+
+	int aux;
+	int inc;
+
+	for (int i = 0; i < n; i++){
+		maxes[i] = 0;
+	}
+	
+	for (int i = 0; i < n; i++){
+		for (int j = 0; j < m; j++){
+			if(matrix[i][j] != 0){
+				aux = (1.0 * qtdPecas[i]) / matrix[n][m];
+				if (aux - (int) aux > 0){
+					inc = 1;
+				}else{
+					inc = 0;
+				}
+				maxes[j] = max( (qtdPecas[i] / matrix[i][j]) + inc, maxes[j]);
+				
+			}
+		}
+		
+	}
+	do
 	{
-		while(contaSol(i)<qtdPecas[i]){
-			solRandL(i);
+		for (int i = 0; i < n; i++)
+		{
+			sol[i] = rand() % (maxes[i] + 1);
+		}
+		triesSol++;
+	} while (contaSol() == 1 && triesSol < MAX_TRY);
+
+	if(triesSol == MAX_TRY){
+		for (int i = 0; i < n; i++)
+		{
+			sol[i] = maxes[i];
 		}
 	}
 }
@@ -215,33 +245,53 @@ void calcLosses(){
 
 }
 
+void getAvaliation(){
+	avaliation = totalLoss;
+	for (int i = 0; i < n; i++)
+	{
+		avaliation += sol[i];
+	}
+}
+
+void optimizeSol(){
+	int avaliationTemp;
+		
+		do{
+			solRand();
+			avaliationTemp = totalLoss;
+			for (int i = 0; i < n; i++){;
+				avaliationTemp += sol[i];
+			}
+		}while(avaliationTemp >= avaliation);
+}
+
 int main(int argc, char **argv){
 	readFile(argc, argv);
+	srand(time(NULL));
 
 	// para determinar o tempo q demorou
 	struct timeval tvi, tvf, tvres;
 	gettimeofday(&tvi,NULL);
 	for(int i=0; i<10000000; i++);	
 	
-	//load();
-	//loadTeste();
-
 	initializeMatrix();
-	
+
 	printf("Matriz\n");
 	printMatrix(matrix);
-	printf("Resultado conta");
-	printf("\n%d %d %d",contaLine(0),contaLine(1),contaLine(2));
+	printf("Resultado conta\n");
+	for (int i = 0; i < n; i++)
+	{
+		printf("%d ",contaLine(i));
+	}
 
 	printf("\nSolucao\n");
-	initializeSol();
+	solRand();
 	printSol();
-    printf("\nResultado conta");
-	printf("\n%d %d %d",contaSol(0),contaSol(1),contaSol(2));
-
 	calcLosses();
-	printf("\nTotal Loss");
-	printf("\n%d",totalLoss);
+	printf("\nTotal Loss: %d", totalLoss);
+
+	getAvaliation();
+	printf("\nAvaliation: %d", avaliation);
 
 	gettimeofday(&tvf,NULL);
 	timersub(&tvf,&tvi,&tvres);
