@@ -6,9 +6,12 @@
 #include <sys/time.h>
 #include <time.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/shm.h>
+#include <semaphore.h>
+
 #define MAX 50
 #define MAX_TRY 1000
-
 
 int matrix[MAX][MAX];
 int sol[MAX];
@@ -157,7 +160,6 @@ int max(int a, int b){
 		return a;
 	else
 		return b;
-	
 }
 
 //usado para fazer a conta da solucao
@@ -177,7 +179,6 @@ int contaSol(){
 }
 
 void solRand(){
-
 	int aux;
 	int inc;
 
@@ -265,36 +266,91 @@ void optimizeSol(){
 		}while(avaliationTemp >= avaliation);
 }
 
+void* create_shared_memory(size_t size) {
+  // Our memory buffer will be readable and writable:
+  int protection = PROT_READ | PROT_WRITE;
+
+  // The buffer will be shared (meaning other processes can access it), but
+  // anonymous (meaning third-party processes cannot obtain an address for it),
+  // so only this process and its children will be able to use it:
+  int visibility = MAP_SHARED | MAP_ANONYMOUS;
+
+  // The remaining parameters to `mmap()` are not important for this use case,
+  // but the manpage for `mmap` explains their purpose.
+  return mmap(NULL, size, protection, visibility, -1, 0);
+}
+
 int main(int argc, char **argv){
 	readFile(argc, argv);
-	srand(time(NULL));
 
-	// para determinar o tempo q demorou
-	struct timeval tvi, tvf, tvres;
-	gettimeofday(&tvi,NULL);
-	for(int i=0; i<10000000; i++);	
-	
-	initializeMatrix();
+	int pids[processNumber];
+	for (int i=0; i<processNumber; i++) {
+		pids[i] = fork();
+		if (pids[i] == 0) {
+			srand(time(NULL));
 
-	printf("Matriz\n");
-	printMatrix(matrix);
-	printf("Resultado conta\n");
-	for (int i = 0; i < n; i++)
-	{
-		printf("%d ",contaLine(i));
+			// para determinar o tempo q demorou
+			struct timeval tvi, tvf, tvres;
+			gettimeofday(&tvi,NULL);
+			
+			for(int i=0; i<10000000; i++);	
+					
+			initializeMatrix();
+
+			printf("Matriz\n");
+			printMatrix();
+
+			printf("--------\n");
+			printf("Resultado conta\n");
+			for (int i = 0; i < n; i++){
+				printf("%d ",contaLine(i));
+			}
+
+			printf("\n--------\n");
+
+			printf("\nSolucao\n");
+			solRand();
+			printSol();
+			calcLosses();
+			printf("\nTotal Loss: %d", totalLoss);
+
+			getAvaliation();
+			printf("\nAvaliation: %d", avaliation);
+
+			printf("\n\n");
+
+			/*int solTeste[3] = {3, 4, 10};
+			int* shmem = create_shared_memory(sizeof(solTeste));
+
+			memcpy(shmem, solTeste, sizeof(solTeste));
+
+			int pid = fork();
+
+		  	if (pid == 0) {
+		  		for(int i=0; i<3; i++){
+		  			printf("Child read: %d\n", *(shmem + i));
+		  		}
+
+		    	int newArray[3] = {2, 9, 20};
+
+		    	memcpy(shmem, newArray, sizeof(newArray));
+
+		    	for(int i=0; i<3; i++){
+		    		printf("Child wrote: %d\n", *(shmem+i));
+		    	}
+
+		  	} else {
+		    	for(int i=0; i<3; i++) {
+		    		printf("Parent read: %d\n", *(shmem + i));
+		    	}
+		    	sleep(2);
+		  	}*/
+
+			gettimeofday(&tvf,NULL);
+			timersub(&tvf,&tvi,&tvres);
+			printf("\nTime = %4ld.%03ld\n", (long)tvres.tv_sec,(long)tvres.tv_usec/1000);
+			exit(0);
+		}
 	}
-
-	printf("\nSolucao\n");
-	solRand();
-	printSol();
-	calcLosses();
-	printf("\nTotal Loss: %d", totalLoss);
-
-	getAvaliation();
-	printf("\nAvaliation: %d", avaliation);
-
-	gettimeofday(&tvf,NULL);
-	timersub(&tvf,&tvi,&tvres);
-	printf("\nTime = %4ld.%03ld\n", (long)tvres.tv_sec,(long)tvres.tv_usec/1000);
 	return 0;
 }
