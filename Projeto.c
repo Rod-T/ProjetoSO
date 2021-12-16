@@ -349,7 +349,6 @@ int main(int argc, char **argv){
 			gettimeofday(&tvf,NULL);
 			timersub(&tvf,&tvi,&tvres);
 			printf("\nTime = %4ld.%03ld\n", (long)tvres.tv_sec,(long)tvres.tv_usec/1000);
-			exit(0);
 		}
 	}
 	return 0;
